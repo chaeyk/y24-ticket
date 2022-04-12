@@ -27,11 +27,12 @@ def get_title(id):
         #   <!--#### Open Graph Meta ####-->
         #   <meta property="og:title" content="YES24 티켓"/>
         #   <meta property="og:description" content=""/>
-        metas = soup('meta', attrs={'property': 'og:title'})
-        for meta in metas:
-            return meta['content']
+        # metas = soup('meta', attrs={'property': 'og:title'})
+        # for meta in metas:
+        #     return meta['content']
+        return soup.title.text
 
-        raise Exception('제목을 찾을 수 없다.')
+        # raise Exception('제목을 찾을 수 없다.')
     except Exception:
         # print(res.text)
         raise
@@ -39,6 +40,9 @@ def get_title(id):
 # perfMonth: ex> 2022-05
 def get_dts(id, perfMonth):
     print(f'id={id}, perfMonth={perfMonth}')
+    if not re.compile(r'\d{4}-\d{2}').match(perfMonth):
+        raise Exception(f'잘못된 perfMonth: {perfMonth}')
+
     res = requests.post(
         f'http://ticket.yes24.com/New/Perf/Sale/Ajax/axPerfDay.aspx',
         data=dict(
