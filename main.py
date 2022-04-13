@@ -86,7 +86,7 @@ def get_idTimes(id, dt):
         # <a href='#' idTime='1167404' title='오후 6시 00분' onclick=jsf_pdi_ChangePlayTime('calendar','1167404','오후6시00분');><span>1회</span> 오후 6시 00분</a>
         links = soup('a')
         for link in links:
-            idTimes.append((link['idtime'], link['title']))
+            idTimes.append((link['idtime'], link['title'], dt))
 
         if not idTimes:
             raise Exception(f'공연 시간이 없다: {dt}')
@@ -147,20 +147,25 @@ print(f'id={id}')
 print(f'perfMonths={perfMonths}')
 print(f'-------------------------------------')
 
-while True:
-    idTimes = []
-    for perfMonth in perfMonths:
-        dts = get_dts(id, perfMonth)
-        for dt in dts:
-            idTimes += get_idTimes(id, dt)
+try:
+    while True:
+        idTimes = []
+        for perfMonth in perfMonths:
+            dts = get_dts(id, perfMonth)
+            for dt in dts:
+                idTimes += get_idTimes(id, dt)
 
-    for idTime in idTimes:
-        if check_ticket(idTime[0]):
-            message = f'{title} - {format_dt(dt)} {idTime[1]} 티켓 떴다!'
-            print(f'bingo!! - {message}')
-            webbrowser.open(f'http://ticket.yes24.com/Perf/{id}')
-            if notiurl:
-                requests.post(notiurl, json={'message': message})
-            sys.exit()
+        for idTime in idTimes:
+            if check_ticket(idTime[0]):
+                message = f'{title} - {format_dt(idTime[2])} {idTime[1]} 티켓 떴다!'
+                print(f'bingo!! - {message}')
+                webbrowser.open(f'http://ticket.yes24.com/Perf/{id}')
+                if notiurl:
+                    requests.post(notiurl, json={'message': message})
+                sys.exit()
 
-    time.sleep(timedelta(minutes=1).total_seconds())
+        time.sleep(timedelta(minutes=1).total_seconds())
+except Exception:
+    if notiurl:
+        requests.post(notiurl, json={'message': '프로그램 에러로 죽음'})
+    raise
