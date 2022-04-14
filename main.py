@@ -96,7 +96,7 @@ def get_idTimes(id, dt):
         print(res.text)
         raise
 
-def check_ticket(idTime):
+def check_ticket(idTime, requiredSeats):
     res = requests.post(
         f'http://ticket.yes24.com/NEw/Perf/Detail/Ajax/axPerfRemainSeat.aspx',
         data=dict(
@@ -116,7 +116,7 @@ def check_ticket(idTime):
             match = re.compile(r'잔여:(\d+)석').search(dd.text)
             if match:
                 seats = int(match.group(1))
-                return seats > 0
+                return seats >= requiredSeats
 
         return False
     except Exception:
@@ -140,11 +140,13 @@ id = config.get(args.section, 'id')
 perfMonths = re.split(' +', config.get(args.section, 'perfMonths'))
 title = get_title(id)
 notiurl = config.get(args.section, 'notiurl', fallback='')
+seats = int(config.get(args.section, 'seats'))
 
 print(f'-------------------------------------')
 print(f'title={title}')
 print(f'id={id}')
 print(f'perfMonths={perfMonths}')
+print(f'seats={seats}')
 print(f'-------------------------------------')
 
 try:
@@ -156,7 +158,7 @@ try:
                 idTimes += get_idTimes(id, dt)
 
         for idTime in idTimes:
-            if check_ticket(idTime[0]):
+            if check_ticket(idTime[0], seats):
                 message = f'{title} - {format_dt(idTime[2])} {idTime[1]} 티켓 떴다!'
                 print(f'bingo!! - {message}')
                 webbrowser.open(f'http://ticket.yes24.com/Perf/{id}')
@@ -164,7 +166,7 @@ try:
                     requests.post(notiurl, json={'message': message})
                 sys.exit()
 
-        time.sleep(timedelta(minutes=1).total_seconds())
+        time.sleep(timedelta(seconds=30).total_seconds())
 except Exception:
     if notiurl:
         requests.post(notiurl, json={'message': '프로그램 에러로 죽음'})
