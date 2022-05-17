@@ -159,7 +159,8 @@ try:
 
         for idTime in idTimes:
             if check_ticket(idTime[0], seats):
-                message = f'{title} - {format_dt(idTime[2])} {idTime[1]} 티켓 떴다!'
+                now = datetime.now().strftime('%Y-%m-%d %H:%M:%S');
+                message = f'{now} {title} - {format_dt(idTime[2])} {idTime[1]} 티켓 떴다!'
                 print(f'bingo!! - {message}')
                 webbrowser.open(f'http://ticket.yes24.com/Perf/{id}')
                 if notiurl:
