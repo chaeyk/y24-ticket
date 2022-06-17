@@ -151,6 +151,7 @@ print(f'-------------------------------------')
 
 try:
     while True:
+        found = False
         idTimes = []
         for perfMonth in perfMonths:
             dts = get_dts(id, perfMonth)
@@ -159,13 +160,16 @@ try:
 
         for idTime in idTimes:
             if check_ticket(idTime[0], seats):
+                found = True
                 now = datetime.now().strftime('%Y-%m-%d %H:%M:%S');
                 message = f'{now} {title} - {format_dt(idTime[2])} {idTime[1]} 티켓 떴다!'
                 print(f'bingo!! - {message}')
-                webbrowser.open(f'http://ticket.yes24.com/Perf/{id}')
-                if notiurl:
-                    requests.post(notiurl, json={'message': message})
-                sys.exit()
+        
+        if found:
+            webbrowser.open(f'http://ticket.yes24.com/Perf/{id}')
+            if notiurl:
+                requests.post(notiurl, json={'message': message})
+            sys.exit()
 
         time.sleep(timedelta(seconds=30).total_seconds())
 except Exception:
